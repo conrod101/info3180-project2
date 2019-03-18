@@ -8,9 +8,15 @@ This file creates your application.
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
+from app.forms import ProfileForm
 from app.models import UserProfile
 from werkzeug.security import check_password_hash
+from app import app, db, login_manager
+from flask import render_template, request, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+from .forms import ProfileForm
+from app.models import UserProfile
+from .data import get_date,format_date
 ###
 # Routing for your application.
 ###
@@ -21,39 +27,74 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/profile',methods = ["GET","POST"])
+def profile():
+    """Render the website's profile page"""
+    form   = ProfileForm()
+    us_Id = len(UserProfile.query.all())
+    
+    if request.method == "POST" and form.validate_on_submit():
+        
+        first_name = form.first_name.data
+        last_name  = form.last_name.data
+        gender     = form.gender.data
+        location   = form.location.data
+        email      = form.email.data
+        bio        = form.biography.data
+        date       = format_date(get_date())
+        image      = form.image.data
+        imageName  = first_name + last_name + str(us_Id + 1)
+        
+        newUser = UserProfile(
+                                first_name = first_name,
+                                last_name  = last_name,
+                                gender     = gender,
+                                location   = location,
+                                email      = email,
+                                biography  = bio,
+                                created_on = date,
+                                profilePic = imageName)
+        db.session.add(newUser)
+        db.session.commit()
+        
+        image.save("app/static/profilepictures/" + imageName + ".png")
+        
+        flash("New User Profile Created", "success")
+        return redirect(url_for("profiles"))
+        
+    return render_template("profile.html",form=form)
+
 @app.route('/about/')
 def about():
-    """Render the website's about page."""
+ 
     return render_template('about.html')
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # change this to actually validate the entire form submission
-        # and not just one field
-        if form.validate_on_submit():
-            username = form.username.data
-            password = form.password.data
-            # Get the username and password values from the form.
-            
-            user = UserProfile.query.filter_by(username=username).first()
+@app.route('/profile/<userid>')
+def userProfile(userid):
+   
+    user = UserProfile.query.filter_by(id = userid).first()
+    return render_template('userprofile.html',user = user,date = format_date(user.created_on))
 
-            if user is not None and check_password_hash(user.password, password ):
-                login_user(user)
-                flash("Login Successful", "Successful")
-                return redirect(url_for("secure_page"))  # they should be redirected to a secure-page route instead
-            else:
-                flash("Unsuccessful Login", "Unsuccesful")
-    return render_template("login.html", form=form)
+
+# @app.route('/<file_name>.txt')
+# def send_text_file(file_name):
+#     """Send your static text file."""
+#     file_dot_text = file_name + '.txt'
+#     return app.send_static_file(file_dot_text)
+
+@app.route('/profiles')
+def profiles():
+    """Render the website's list of profiles"""
+    users = UserProfile.query.all()
+    return render_template("profiles.html",users = users)
+
+
+
 
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
-@login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
 
 ###
 # The functions below should be applicable to all Flask apps.
