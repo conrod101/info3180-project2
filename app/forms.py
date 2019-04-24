@@ -3,13 +3,33 @@ from wtforms import StringField, PasswordField,SelectField,FileField
 from wtforms.validators import InputRequired,Email,DataRequired
 from flask_wtf.file import FileRequired,FileAllowed
 from wtforms.widgets import TextArea
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, IntegerField, SelectField, TextAreaField
+from wtforms.validators import InputRequired, Required
+from wtforms import validators, ValidationError
+from flask_wtf.file import FileField, FileAllowed, FileRequired 
 
-class ProfileForm(Form):
-    first_name = StringField('First Name',validators = [InputRequired()])
-    last_name  = StringField('Last Name',validators = [InputRequired()])
-    gender     = SelectField('Gender', choices = [('Male','Male'),('Female','Female')],validators = [InputRequired()])
-    location   = StringField('Location',validators=[InputRequired()])
-    email      = StringField('Email Address', validators = [InputRequired(),Email()])
-    biography  = StringField('Biography',validators = [InputRequired()], widget=TextArea())
-    image      = FileField('Profile Picture', validators=[FileRequired(),FileAllowed(['jpg', 'png'], 'Images only!')])
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
+    
+
+class SignUpForm(FlaskForm):
+    username  = StringField('Username', [validators.Required("(Required)")])
+    password  = PasswordField('Password', validators=[InputRequired()])
+    firstname = StringField('Firstname', [validators.Required("(Required)")])
+    lastname  = StringField('Lastname', [validators.Required("(Required)")])
+    email     = StringField("Email",[validators.Required("(Required)"), validators.Email("(Required)")])
+    location  = StringField("Location",[validators.Required("(Required)")])
+    biography = TextAreaField('Bio', validators=[InputRequired()])
+    photo     = FileField('Profile Picture', validators=[FileRequired(), FileAllowed(['jpg', 'png', 'Images only!'])])
+    
+class Upload(FlaskForm):
+    image   = FileField('Profile Picture', validators=[FileRequired(), FileAllowed(['jpg', 'png', 'Images only!'])])
+    caption = TextAreaField('Caption', validators=[InputRequired()])
+    
+
+class UploadForm(FlaskForm):
+    description = StringField(validators = [InputRequired()],widget = TextArea())
+    photo       = FileField(validators   = [FileRequired(),FileAllowed(['jpg','png','jpeg'],'Only Images Allowed')])
     

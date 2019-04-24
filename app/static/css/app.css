@@ -1,126 +1,243 @@
 body {
     padding-top: 5rem;
-    background-color: #EBF3FA;
-}
-
-
-
-
-.users, .user {
-    border-radius: 5px;
-    border-top: solid 4px #4A90E2;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    background-color: #ffffff;
+    background-image: url(/static/images/43.jpg);
+    
     
 }
-.users {
-    min-width: 50%;
-    width: 500px;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 19.2px;
-  justify-content: center;
+
+footer  {
+    padding-top: 20px;
 }
 
+h2{
+    font-weight: 700;
+}
 
-
-form div, h4, h3 {
+.bg-nav{
+    background: linear-gradient(to right, #e242ff , #af00ad);
+    font-family: 'Fjalla One', sans-serif;
     font-weight: bold;
-    color: #1E1E1E;
 }
 
-.view-profile-button{
-    height:100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.btn-color{
+    background: linear-gradient(to right, #e242ff , #af00ad);
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: bold;
+    color: white;
 }
 
-.grid-container{
-display: grid;
-width: 460px;
-grid-template-columns: 120px 220px 120px;
-box-shadow: 0 0 0 0.35rem #fff;
-border: 4px solid #1ad5fc;
-border-radius: 12px;
-margin: auto;
-background-color: white;
+.fcont {
+    margin:auto;
+    margin-top: 30px;
+    border: solid 0px #af00ad;
+    border-radius: 5px;
+    width: 380px;
+    height: auto;
+    background: linear-gradient(to right, #e242ff , #af00ad);
+    font-family: 'Fjalla One', sans-serif;
 }
 
-.image-container{
-    margin :auto;
-    height:100px;
+.scont {
+    margin:auto;
+    margin-top: 30px;
+    border: solid 0px #af00ad;
+    border-radius: 5px;
+    width: 400px;
+    height: auto;
+    background: linear-gradient(to right, #e242ff , #af00ad);
+    font-family: 'Fjalla One', sans-serif;
+    color: black;
+}
+
+
+.form-group{
+    
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.head{
+    padding-top: 20px;
+    text-align: center;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+}
+
+.containment-box{
+    border: solid 10px linear-gradient(to right, #e242ff , #af00ad);
+    border-radius: 5px;
+    width: 600px;
+    height: 340px;
+    margin:auto;
+    margin-top: 60px;
+    background: linear-gradient(to right, #e242ff , #af00ad);
+    text-align: center;
+}
+
+.logo{
+    margin:auto;
+}
+
+.phrase{
+    font-family: 'Quicksand', sans-serif;
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.upcont {
+    margin:auto;
+    margin-top: 30px;
+    border: solid 0px #af00ad;
+    border-radius: 5px;
+    width: 380px;
+    height: auto;
+    background: linear-gradient(to right, #ff4264 , #af00ad);
+    font-family: 'Fjalla One', sans-serif;
+}
+
+.outside {
+    margin:auto;
+    margin-top: 5px;
+    border: solid 10px #ededed;
+    border-radius: 5px;
+    height: auto;
+    background: #ededed;
+    font-family: 'Fjalla One', sans-serif;
+    position: relative;
+}
+
+.top{
+    border: solid 0px #af00ad;
+    border-radius: 5px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    background: white;
+    position: relative;
+}
+
+.top-left{
+    display: grid;
+    grid-template-columns: 2fr;
+    position: relative;
+    text-align: center;
+    margin-top: 60px;
     
 }
 
-.user-info-container{
-    height:100px;
-    padding-left:10%;
+.count{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    position: relative;
+    text-align: center;
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: bold;
+    font-size: 2em;
 }
 
-
-.view-profile-button{
-    height:100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.top-right{
+    display: grid;
+    grid-template-columns: repeat(2,.4fr);
+    position: relative;
+    text-align: center;
+    margin-top: 30px;
 }
 
-button{
-background-color: #7ed321;
-
-border-radius: 8px;
-color: #fffefd;
-font-weight: bold;
-cursor: pointer;
-width: 100%;
-font-size: 15px;
+.bottom {
+    display: grid;
+    grid-template-columns: repeat(4,.4fr);
+    border-radius: 5px;
+    position: relative;
+    margin-top: 20px;
+    background: white;
+    
+}
+.outerborder {
+    border: solid 4px #af00ad;
+    border-radius: 5px;
+    background: white;
+    position: relative;
 }
 
-.user-profile-container{
-    display:grid;
-    grid-template-columns: 220px 340px;
+.imgupld{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.platter {
+    margin:auto;
+    border: solid 8px #ededed;
+    border-radius: 5px;
+    height: auto;
+    width: 70%;
+    background: #ededed;
+    font-family: 'Fjalla One', sans-serif;
+    position: relative;
+}
+
+.outerborder{
+    margin:auto;
+    margin-top: 20px;
+    width: 83.5%;
+    border: solid 8px white;
+}
+
+.content{
+    margin:auto;
+    width: 70%;
+}
+
+.imgpst{
+    text-align: center;
+}
+
+.btns{
+    display: grid;
+    grid-template-columns: repeat(2,.1fr);
+    position: relative;
+    
+}
+
+.pbtn{
+    text-decoration: none;
+}
+
+.capt{
+    font-family: 'Fjalla One', sans-serif;
+}
+
+.uname {
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: bold;
+}
+
+.errrr {
+    font-family: 'Fjalla One', sans-serif;
+    font-weight: bold;
+}
+
+.likebtn {
+    display: grid;
+    grid-template-columns: repeat(4,.5fr);
+}
+
+.dtnL {
     
     margin:auto;
-    width:580px;
-    height:auto;
-    padding-left:25px;
+    display: grid;
+    grid-template-columns: 2fr .5fr;
+    
 }
 
-.profile-photo{
-    height:220px;
+.picNname{
+    display: grid;
+    grid-template-columns: repeat(2,.08fr);
 }
 
-.profile-data{
-    height:220px;
-    padding-left:15px;
-}
-
-.bio{
-    min-height:100px;
-    grid-row:2;
-    grid-column:1/3;
-}
-
-.buttons{
-    height:60px;
-    grid-row:3;
-    grid-column:1/3;
-}
-
-button:hover, a:hover {
-    opacity: 0.7;
-}
-
-
-
-img{
-    max-height:100%;
-    max-width:100%;
-    padding:4px;
-}
-
-.bttn{
-     width: 45%;   
+.errrr{
+    margin: auto;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: 90%;
+    height: auto;
 }
