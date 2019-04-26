@@ -1,832 +1,811 @@
 /* Add your Application JavaScript */
 
-bus = new Vue();
+/*
+import Vue from 'vue';
+import FlashMessage from '@smartweb/vue-flash-message';
+Vue.use(FlashMessage);
+*/
+
+Vue.config.productionTip = false;
 
 Vue.component('app-header', {
     template: `
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-dark bg-nav fixed-top">
-              <router-link class="nav-link" to=""><img src="/static/images/log.png" height="48px" width="120px" alt="Logo"></router-link>
-              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                </ul>
-                
-                <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <router-link class="nav-link" to="/" v-if = '!userLoggedIn'>Home<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active" v-if = 'userLoggedIn'>
-                    <router-link class="nav-link" to="/explore">Explore<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active">
-                    <router-link class="nav-link" :to="'/users/' + current_user" v-if = 'userLoggedIn'>My Profile<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active">
-                    <router-link class="nav-link" to="/posts/new" v-if = 'userLoggedIn'>New Post<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active">
-                    <router-link class="nav-link" to="/login" v-if  = '!userLoggedIn'>Login<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active">
-                    <router-link class="nav-link" to="/register" v-if   = '!userLoggedIn'>Sign Up<span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item active">
-                    <router-link class="nav-link" to="/logout" v-if = 'userLoggedIn'>Logout<span class="sr-only">(current)</span></router-link>
-                </li>
-                </ul>
-              </div>
-            </nav>
-        </header>    
-    `,
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" >
+    <div class="container" id="headz">
+      <img class="mr-auto logophoto"  v-bind:src="userphoto"/>
+      <a class="navbar-brand font text-white">Photogram</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="row collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
+          </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/explore">Explore<span class="sr-only">(current)</span></router-link>
+          </li>
+           <li class="nav-item active">
+            <router-link class="nav-link" to="/users/0">My Profile<span class="sr-only">(current)</span></router-link>
+          </li>
+          <li class="nav-item active" v-if = "user !== null" >
+            <router-link class="nav-link" to="/logout" >Logout<span class="sr-only">(current)</span></router-link>
+          </li>
+          
+         <li class="nav-item active" v-else>
+            <router-link class="nav-link" to="/login" >Login<span class="sr-only">(current)</span></router-link>
+        </li> 
+          
+        </ul>
+        </div>
+      </div>
+    </nav>
+    `,watch: {
+        '$route' (to, fom){
+            this.reload()
+        }
+      },
+    created: function() {
+        let self = this;
+        self.user=localStorage.getItem('token');
+        self.userid=localStorage.getItem('userid');
+        if (localStorage.getItem('userphoto')){
+            self.userphoto=localStorage.getItem('userphoto');
+        };
+        
+        //console.log("Logged in: " + this.userLoggedIn);
+        bus.$on('logged', () => {
+        this.userLoggedIn = this.isLoggedIn();
+        });
+    
+    },
     data: function() {
-            return {
-                userLoggedIn:this.isLoggedIn()
-            };
+        return {
+            user: [],
+            userid:'',
+            userphoto:'/static/images/log.png',
+            userLoggedIn:this.isLoggedIn(),
+
+        }
+    },
+    methods:{
+        reload(){
+            let self = this;
+            self.user= localStorage.getItem('token');
+            self.userid=localStorage.getItem('userid');
+            if (localStorage.getItem('userphoto')){
+                self.userphoto=localStorage.getItem('userphoto');
+            }
+            else{
+                self.userphoto='/static/images/log.png';  
+            }
+            
         },
-        created:
-            function(){
-                this.current_user = localStorage.getItem('current_user');
-                //console.log("Logged in: " + this.userLoggedIn);
-                bus.$on('logged', () => {
-                this.userLoggedIn = this.isLoggedIn();
-            });
-            },
-        methods:{
-                isLoggedIn: function(){
+        isLoggedIn: function(){
                     return !(localStorage.getItem('token')==null);
                 }
-        }
+    }
 });
 
-
-const Home = Vue.component('home', {
-    template: `
-    <div>
-    <br>
-    <div class="containment-box">
-        <div class="logo">
-            <div>
-                <!--App LOGO-->
-                <img src="/static/images/log.png" height="220px" width="550px" alt="Logo">
-            </div>
+Vue.component('flash-message', {
+    name: 'flash-message',
+    template:`
+        <div>
+            <transition name="fade">
+                <div v-if="display_Flash" class="alert alert-success" role="alert"">
+                    <p style="text-align:center;">{{flash_Message}}</p>
+                </div>
+            </transition>
         </div>
-        <div class="phrase">
-            <!--App Tagline/Catch Phrase-->
-            <p>{{ welcome }}</p>
-            <router-link class="btn btn-success col-md-5" to="/register">Register</router-link>
-            <router-link class="btn btn-primary col-md-5" to="/login">Login</router-link>
-        </div>
-        
-    </div>
-    </div>
-    `,
-    data: function() {
-            return {
-                welcome: 'Seize the moment and Share it.'
+    `,watch: {
+        '$route' (to, fom){
+            let self = this;
+            self.display_Flash=(localStorage.getItem('displayFlash') === "true");
+            self.flash_Message=localStorage.getItem('flashMessage');
+            
+            if(self.display_Flash){
+                setTimeout(function() { 
+                    self.display_Flash = false;
+                    localStorage.setItem('displayFlash', false);
+                    self.flash_Message = '';
+                    localStorage.setItem('flashMessage', '');
+                }, 3000);
+                
+                if(localStorage.getItem('token')==null){
+                    localStorage.removeItem('displayFlash');
+                    localStorage.removeItem('flashMessage');
+                };
             };
-        },
-        watch:{
-            '$route' (to, from){
-                let user_id = to.params.user_id;
-                this.$router.go(to);
-            }
         }
+      },data: function(){
+        return{
+            display_Flash: false,
+            flash_Message: '',
+        }
+    }
 });
-
-
 
 Vue.component('app-footer', {
     template: `
-        <footer>
-            <div class="container">
-                <p>Copyright &copy {{ year }} PhotoGram Inc.</p>
+    <footer class="page-footer bg-primary font-small pt-4 mt-4">
+        <div class="footer-copyright py-3 text-center">
+            <p>Copyright &copy; Photogram.</p>
+        </div>
+    </footer>
+    `
+});
+
+const Home = Vue.component('home', {
+   template: `
+   <div class="container contentdisplay" v-if="usertoken=='Not logged in'">
+        <div class="row">
+            <div class="col-md-5 col-sm-10">
+                <img class="homeimage img-thumbnail" v-bind:src="homephoto"/>
             </div>
-        </footer>
-    `,
+            <div class=" shadow jumbotron homedisplay col-md-5 col-sm-10">
+                <div class="row homelogo">
+                   <h3 class="font homelogoname">Photogram</h3>
+                </div>
+                <hr>
+                <p class="lead">Seize the moment and Share it</p>
+                </br>
+                <router-link class="btn btn-success col-lg-5 col-md-3" to="/register">Register</router-link>
+                <router-link class="btn btn-primary col-lg-5 col-md-3" to="/login">Login</router-link>
+            </div>
+        </div>
+    </div>
+    <div class="row regular" v-else>
+        <div class="jumbotron shadow">
+            <h3 class="align-middle">You are already logged in</h3>
+        </div>
+    </div>
+   `,
+    created: function(){
+        let self = this;
+        if (localStorage.getItem('token')){
+            self.usertoken=localStorage.getItem('token');
+        }
+        
+    },
     data: function() {
-        return {
-            year: (new Date).getFullYear()
-        };
+       return {
+           usertoken:'Not logged in',
+           iconphoto:'/static/images/log.png',
+           homephoto:'/static/images/download.jpg',
+       }
     }
 });
 
-
-const loginForm = Vue.component('login',{
-    template:
-    `
-    <div>
-    <div class="fcont">
-        <div class="login-form">
-            <div class="head">
-                <img src="/static/images/log.png" height="60px" width="150px" alt="Logo">
+const Register=Vue.component('register',{
+    template:`<div v-if="usertoken=='Not logged in'" class="row container regular">
+                    <p class="lead col-md-12 formlabel">Register</p>
+                    <div class="jumbotron shadow">
+                        <ul class="list-group">
+                            <li class="col-md-12 list-group-item list-group-item-danger" v-for="message in error" v-if="error.length > 1">
+                                {{message}}
+                            </li>
+                        </ul>
+                    <form class="col-md-12" id="registerform" @submit.prevent="register" method="POST" enctype="multipart/form-data">
+                        <label class="input-group">Username</label>
+                        <input class="form-control" type="text" name="username">
+                        <br>
+                        
+                        <label class="input-group">Password</label>
+                        <input class="form-control" type="password" name="password">
+                        <br>
+                        
+                        <label class="input-group">Retype-Password</label>
+                        <input class="form-control" type="password" name="confirmpassword">
+                        <br>
+                        
+                        <label class="input-group">Firstname</label>
+                        <input class="form-control"  type="text" name="fname">
+                        <br>
+                        
+                        <label class="input-group">Lastname</label>
+                        <input class="form-control" type="text" name="lname">
+                        <br>
+                        
+                        <label class="input-group">Email</label>
+                        <input class="form-control"  type="email" name="email">
+                        <br>
+                        <label class="input-group">Location</label>
+                        <input class="form-control"  type="text" name="location">
+                        <br>
+                        
+                        <label class="input-group">Biography</label>
+                        <textarea class="form-control col-md" id="desc" rows="5" name="biography"></textarea>
+                        <br>
+                        
+                        <label class="input-group">Photo</label>
+                        <input class="btn btn-default btn-file" type="file"  name="profile_photo"/>
+                        
+                        <br><br>
+                        
+                        <button class="btn btn-success col-md-12" type="submit">Register</button>
+                        <br><br>
+                    </form>
+                </div>   
             </div>
-            <div class="errrr" align="center">
-                <div v-if ="errors.length > 0">
-                    <ul>
-                        <li v-for="error in errors" class="alert-danger">
-                            {{ error.error }}
-                        </li>
-                    </ul>
-                </div>
-                <div v-else class="alert-success">
-                    {{ response.message }}
-                </div>
+        <div class="row regular" v-else>
+            <div class="jumbotron shadow">
+                <h3 class="align-middle">You are already a user</h3>
             </div>
-            <div class="form-ish">
-                <form  @submit.prevent="loginUser" method = 'post' name = 'login_form' id = 'loginform'>
-                <div class="form-group">
-                    <label   for = 'username'     id = 'username_label'><h5>Username:</h5></label>
-                    <input class = 'form-control' id = 'username' type = 'text' name = 'username' rows = '5' placeholder="Enter Username" >
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'password'     id = 'password_label'><h5>Password:</h5></label>
-                    <input class = 'form-control' id = 'password' type = 'password' name = 'password' placeholder="Enter Password">
-                </div>
-                <div class="form-group">
-                    <button type="submit" name="submit" class="btn btn-primary btn-block">Log in</button>
-                </div>
-                <br>
-                </form>
-            </div>
-        </div>
-    </div>
-    </div>
-    `,
-    data:function (){
-        return {
-            response: {},
-            errors: []
-        };
-    },
-    methods:{
-        loginUser: function(){
-            let self       = this;
-            let loginform  = document.getElementById("loginform");
-            let form_data  = new FormData(loginform);
-            fetch('/api/auth/login',{
-                method:'POST',
-                body:form_data,
-                headers:{
-                        'X-CSRFToken': token,
-                         },
-                        credentials: 'same-origin'
-            }).then(function(response){
+        </div>`
+, created:function(){
+    let self = this;
+        if (localStorage.getItem('token')){
+            self.usertoken=localStorage.getItem('token');
+        }
+},data: function(){
+    return {
+        response:[],
+        error:[],
+        usertoken:'Not logged in',
+    }
+},methods:{
+    register: function(){
+        let self = this;
+        let registerform = document.getElementById('registerform');
+        let form_data = new FormData(registerform);
+        fetch("/api/users/register", { 
+            method: 'POST', 
+            body: form_data,
+            headers: {
+                    'X-CSRFToken': token
+                },
+            credentials: 'same-origin'
+            })
+            .then(function (response) {
                 return response.json();
-            }).then(function(jsonResonse){
-                if(jsonResonse.Errors == null){
-                    localStorage.setItem('token',jsonResonse.jwt_token);
-                    localStorage.setItem('current_user',jsonResonse.current_user);
-                    self.response = jsonResonse.message;
-                    self.errors = [];
-                    bus.$emit('loggedIn');
-                    //console.log(self.response);
-                    self.$router.push({path:'/explore'})
-                    location.reload();
+            })
+            .then(function (jsonResponse) {
+                if(jsonResponse.response){
+                    localStorage.setItem('displayFlash', true);
+                    localStorage.setItem('flashMessage', jsonResponse.response["0"].message);
+                    self.$router.push('/login');
+                } 
+                else{     
+                    self.error=jsonResponse.errors["0"]["error"];  
                 }
-                else{
-                    self.errors = jsonResonse.Errors;
-                    console.log(self.error);
-                }
-            }).catch(function(error){
+            
+            })
+            .catch(function (error) {
                 console.log(error);
             });
-        }
-    },
-    watch:{
-        '$route' (to, from){
-            let user_id = to.params.user_id;
-            this.$router.go(to);
-            }
-        }
+    }
+}
 });
 
+const Login =Vue.component('login',{
+    template:`<div v-if="usertoken=='Not logged in'" class="row container regular">
+                    <p class=" col-md-12 lead formlabel"> Login</p> 
+                    <div class="jumbotron shadow">
+                        <ul class="list-group">
+                            <li v-for="error in error" class="list-group-item list-group-item-danger">
+                                {{error}} <br>
+                            </li>
+                        </ul>
+                        <form class="col-md-12" id="loginform" method="POST" @submit.prevent="login">
+                            <label class="input-group">Username</label>
+                            <input class="form-control" type="text" name="username">
+                            <br><br>
+                            <label class="input-group" >Password</label>
+                            <input class="form-control" type="password" name="password"> 
+                            <br><br>
+                            <button class="btn btn-success col-md-12" type="submit">Login</button>
+                        </form>
+                    </div>
+                </div><div class="row regular" v-else><div class="jumbotron shadow"><h3 class="align-middle">You are already logged in</h3></div></div>`
+,created:function(){
+    
+    let self = this;
+        if (localStorage.getItem('token')){
+            self.usertoken=localStorage.getItem('token');
+        }
+}, data: function() {
+    return {
+        response:[],
+        error:[],
+        usertoken:'Not logged in',
+    }
+    
+}, methods:{
+    login: function(){
+        let self = this;
+        let loginform = document.getElementById('loginform');
+        let form_data = new FormData(loginform);
+        fetch("/api/auth/login", { 
+            method: 'POST', 
+            body: form_data,
+            headers: {
+                    'X-CSRFToken': token
+                },
+            credentials: 'same-origin'
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+                if(jsonResponse.errors){
+                    self.error = jsonResponse.errors['0']['error'];
+                }
+                else{
+                    let jwt_token = jsonResponse.response["0"].token;
+                    let userid=jsonResponse.response["0"].userid;
+                    let userphoto=jsonResponse.response["0"].userphoto;
+                    localStorage.setItem('token', jwt_token);
+                    localStorage.setItem('userid',userid);
+                    localStorage.setItem('userphoto',userphoto);
+                    (jsonResponse.response["0"].message);
+                    
+                    localStorage.setItem('displayFlash', true);
+                    localStorage.setItem('flashMessage', jsonResponse.response["0"].message);
+                   
+                   //flashMessage.success({title:'Login Successful', message:'success', time:5000});
+                   
+                    self.$router.push({path:`/explore`})
+                }
+                
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+}
+    
+});
 
-const uploadForm = Vue.component('uploadForm',{
-    template:
-    `
-    <div>
-    <div class="upcont">
-        <div class="upload-form">
-            <div class="head">
-                <img src="/static/images/log.png" height="60px" width="150px" alt="Logo">
-            </div>
-            <div class="errrr" align="center">
-                <div v-if ="errors.length > 0">
-                    <ul>
-                        <li v-for="error in errors" class="alert-danger">
-                            {{ error.error }}
-                        </li>
-                    </ul>
-                </div>
-                <div v-else class="alert-success">
-                    {{ response }}
-                </div>
-            </div>
-            <div class="form-ish">
-                <form id = 'uploadform' enctype = 'multipart/form-data' method = 'POST' @submit.prevent="createNewPost" name = 'uploadform'>
-                <div class="form-group">
-                    <label for="photo_upload" id="photo-upload_label"><h5>Photo</h5></label>
-                    <input id="photo" type="file" name="image">
-                </div><br>
-                
-                <div class="form-group">
-                    <label for="caption" id="caption_label"><h5>Caption</h5></label>
-                    <textarea class ="form-control" id ="caption" name ="caption" rows = '5'></textarea>
-                </div>
-                
-                <div id="space" class="form-group">
-                    <button type="submit" name="submit" class="btn btn-primary btn-block">Upload</button>
-                </div>
-                <br>
-                </form>
-            </div>
-        </div>
+const Logout=Vue.component('logout',{
+    template:`<div class="row container regular" v-if="usertoken !=''">
+    <div class="jumbotron shadow">
+    <p class="lead">Are you sure you want to logout</p>
+    <form id="logout" @submit.prevent="logout">
+    <button class="btn btn-primary col-md-12" type="submit" >Logout</button>
+    </form>
     </div>
     </div>
-    `,
-    data:function (){
+    <div class="row regular" v-else><div class="jumbotron shadow"><h3 class="align-middle">You are not logged in</h3></div></div>
+    `,created:function(){
+            let self = this;
+            if(localStorage.getItem('token')!==null){
+                self.usertoken=localStorage.getItem('token');   
+            }
+        },
+    data:function(){
         return {
-            response:"",
-            errors:[]
-        };
-    },
-    methods:{
-        createNewPost: function(){
-            let self         = this;
-            let uploadform   = document.getElementById("uploadform");
-            let form_data    = new FormData(uploadform);
-            let current_user = localStorage.getItem('current_user');
-            
-            fetch('/api/users/'+current_user+'/posts',{
-                method:  'POST',
-                body: form_data,
+            response:[],
+            usertoken:''
+        }
+    },methods:{
+        logout: function(){
+        if (localStorage.getItem('token')!==null){
+            let self = this;
+            self.usertoken=localStorage.getItem('token');
+            let logoutform = document.getElementById('logout');
+            let form_data = new FormData(logoutform);
+            fetch("/api/auth/logout", { 
+                method: 'GET',
                 headers: {
-                        'X-CSRFToken': token,
-                        'Authorization': 'Bearer '  + localStorage.getItem('token')
-                         },
-                        credentials: 'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                if(jsonResonse.Errors == null){
-                    self.response = jsonResonse.message;
-                    self.errors   = [];
-                    $("#uploadform")[0].reset();
-                    //console.log(jsonResonse)
-                }
-                else{
-                    self.errors = jsonResonse.Errors;
-                    console.log(self.errors);
-                }
-            }).catch(function(error){
-                console.log(error);
-            });
-        }
-    },
-    watch:{
-        '$route' (to, from){
-            let user_id = to.params.user_id;
-            this.$router.go(to);
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'X-CSRFToken': token
+                    },
+                credentials: 'same-origin'
+                
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (jsonResponse) {
+                    if(jsonResponse.response){
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userid');
+                        localStorage.removeItem('userphoto');
+                       
+                       localStorage.setItem('displayFlash', true);
+                       localStorage.setItem('flashMessage', jsonResponse.response["0"].message);
+                       
+                         self.$router.push('/')
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             }
-        }
-});
+        }    
+    }
+})
 
-
-const signupForm = Vue.component('signupform',{
-    template:
-    `
-    <div>
-    <div class="scont">
-        <div id = 'register-page'>
-            <div class="head">
-                <img src="/static/images/log.png" height="48px" width="120px" alt="Logo">
-                <p>Seize the moment and Share it.</p>
-            </div>
-            <div class="errrr" align="center">
-                <div v-if ="errors.length > 0">
-                    <ul>
-                        <li v-for="error in errors" class="alert-danger">
-                            {{ error.error }}
-                        </li>
-                    </ul>
-                </div>
-                <div v-else class="alert-success">
-                    {{ response }}
-                </div>
-            </div>
-            <form @submit.prevent="RegisterUser" method="post" name = 'signup_form' id = 'signupform' enctype = 'multipart/form-data'>
-                <div class="form-group">
-                    <label   for = 'username' id = 'username_label'> <h5>Username</h5> </label>
-                    <input class = 'form-control' id = 'username' type = 'text' name = 'username' rows = '5' placeholder="Enter Username">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'password' id = 'password_label'> <h5>Password</h5> </label>
-                    <input class = 'form-control' id = 'password' type = 'password' name = 'password' rows = '5' placeholder="Enter Password">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'firstname' id = 'firstname_label'> <h5>Firstname</h5> </label>
-                    <input class = 'form-control' id = 'firstname' type = 'text' name = 'firstname' rows = '5' placeholder="Firstname">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'lastname' id = 'lastname_label'> <h5>Lastname</h5> </label>
-                    <input class = 'form-control' id = 'lastname' type = 'text' name = 'lastname' rows = '5' placeholder="Lastname">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'email' id = 'email_label'> <h5>Email</h5> </label>
-                    <input class = 'form-control' id = 'email' type = 'text' name = 'email' rows = '5' placeholder="eg. yourname@example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'location' id = 'location_label'> <h5>Location</h5> </label>
-                    <input class = 'form-control' id = 'location' type = 'text' name = 'location' rows = '5' placeholder="eg. Ibiza, Spain">
-                </div>
-                
-                <div class="form-group">
-                    <label   for = 'biography' id = 'biography_label'> <h5>Biography</h5> </label>
-                    <textarea class = 'form-control' id = 'biography' name = 'biography' rows = '5'></textarea>
-                </div>
-            
-                <div class="form-group">
-                    <label   for = 'photo' id = 'photo_label'> <h5>Photo</h5> </label>
-                    <input id = 'photo' type = 'file' name = 'photo'>
-                </div><br>
-                
-                <div class="form-group">
-                    <button type="submit" name="submit" class="btn btn-primary btn-block">Sign Up</button>
-                </div>
+const AddPost=Vue.component('addpost',{
+    template:`
+    <div class="row container regular" v-if="usertoken !== ''">
+        <p class=" col-md-12 lead formlabel">New Post</p>
+        <div class="jumbotron shadow">
+            <ul class="list-group">
+                <li v-for="error in error" class="list-group-item list-group-item-danger">
+                    {{error}}
+                </li>
+            </ul>
+            <form id="postform"  @submit.prevent="uploadPost" method="POST" enctype="multipart/form-data">
+                <label class="input-group lead" for="photo">Photo</label>
+                <input class="form-control-file" type="file"  name="photo"/>
                 <br>
+                <br>
+                <label class="input-group lead" for="caption">Caption</label>
+                <textarea class="form-control" rows="3" placeholder="Write a caption..." id="caption" name="caption"></textarea>
+                <br><br>
+                <button class="btn btn-success col-md-12" type="submit">Submit</button>
             </form>
         </div>
     </div>
-    </div>
-    `,
-    data: function(){
+    <div class="row" v-else>
+        <div class="jumbotron">
+            <h3>You are not logged in</h3>
+        </div>
+    </div>`,
+        created:function(){
+            let self = this;
+            if(localStorage.getItem('token')!==null){
+                self.usertoken=localStorage.getItem('token');   
+            }
+        },
+    data:function(){
         return {
-            response:"",
-            errors:[]
-        };
-    },
-    methods: {
-        RegisterUser: function(){
-            let self       = this;
-            let signupform = document.getElementById("signupform");
-            let form_data  = new FormData(signupform);
+            response:[],
+            error:[],
+            usertoken:''
+        }
+    },methods: {
+        uploadPost: function () {
+            let self = this;
+            let uploadForm = document.getElementById('postform');
+            let form_data = new FormData(uploadForm);
+            fetch("/api/users/0/posts", { 
+            method: 'POST',
+            body: form_data,
+            headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                    'X-CSRFToken': token
+                },
+            credentials: 'same-origin'
+            
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+                 if(jsonResponse.response){
+                    localStorage.setItem('displayFlash', true);
+                    localStorage.setItem('flashMessage', jsonResponse.response["0"].message);
+                    self.$router.push({path:`/users/${0}`})
+                } 
+                else{     
+                    self.error=jsonResponse.errors["0"]["error"];  
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+    
+});
 
-            fetch('/api/users/register',{
-                method:  'POST',
-                body: form_data,
+const Explorer=Vue.component('Allposts',{
+template:`
+            <div class="container explorer" v-if="usertoken !=''">
+             <div class="row">
+                <div v-if="posts.length>=1" class="row col-md-7 float-left">
+                    <div class="jumbotron shadow" style="width:90%" v-for="post in posts">
+                        <div class="row userimage">
+                            <img class="user_post_img" v-bind:src="post.userphoto"> 
+                            <router-link :to="{name: 'users', params: { user_id : post.user_id}}" >    
+                                <h5 class="align-middle"> {{post.username}} </h5>
+                            </router-link> 
+                            
+                            <!-- <router-link to="users/{{post.user_id}}" >{{post.username}} </router-link>   -->
+                            <!-- <a href="'#/users/'"+{{post.user_id}}+'" > {{post.username}} </a>  -->
+                            
+                        </div>
+                        <br>
+                        <div class="row col-md-12">
+                            <img class="post_img img-thumbnail shadow" v-bind:src="post.photo"/>
+                        </div>
+                        <br>
+                        <div class="row col-md-12">
+                            <p class="lead postcaption">{{post.caption}}</p>    
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-1" :id="'like_btn'+post.id" v-if="post.likebyuser=='No'">
+                                    <img :id=post.id v-on:click="like(post.id)" class="like_btn" v-bind:src="'static/images/heart1.png'" />
+                            </div>
+                            <div class="col-md-1" v-else>
+                                    <img class="like_btn" v-bind:src="'static/images/heart2.png'" />
+                            </div>
+                            <div class="col-md-5">
+                                <p class="like_user"> <span :id="'like'+post.id">{{post.likes}}</span> Likes</p>
+                            </div>
+                            <div class="col-md-5 postdate">
+                                <p>{{post.created_on}}</p></div>
+                            </div>
+                            
+                        </div>
+                </div>
+                <div class="jumbotron" v-else>
+                    <h5> No Posts</h5>
+                </div>
+                <div class="col-md-5 float-right">
+                    <router-link class="btn btn-primary col-md-6" to="/postnew">New Post</router-link>
+                </div>
+            </div>
+        </div>
+        <div class="row regular" v-else>
+            <div class="jumbotron shadow">
+                <h3 class="align-middle">You are not logged in</h3>
+            </div>
+        </div>`,
+        created: function () {
+            let self = this;
+            if(localStorage.getItem('token')!==null){
+                self.usertoken=localStorage.getItem('token');
+                console.log(self.usertoken);
+                fetch("/api/posts", { 
+                method: 'GET',
                 headers: {
-                        'X-CSRFToken': token,
-                        'Authorization': 'Bearer '  + localStorage.getItem('token')
-                         },
-                        credentials: 'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                if(jsonResonse.Errors == null){
-                    self.response = jsonResonse.message;
-                    $("#signupform")[0].reset();
-                    self.errors = [];
-
-                    //console.log(jsonResonse);
-                }
-                else{
-                    console.log(jsonResonse);
-                    self.errors = jsonResonse.Errors;
-                    console.log(self.errors);
-                }
-            })
-            .catch(function(error){
-                console.log(error);
-            });
-        }
-    },
-    watch:{
-        '$route' (to, from){
-        let user_id = to.params.user_id;
-        this.$router.go(to);
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'X-CSRFToken': token
+                    },
+                credentials: 'same-origin'
+                
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (jsonResponse) {
+        
+                    self.posts=jsonResponse.response['0']['posts'];
+                    console.log(self.posts);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             }
-        }
-});
-
-
-const profile = Vue.component('profile',{
-    template:
-    `
-    <div>
-    <div class="errrr">
-        <div v-if ="errors.length > 0" align="center">
-            <ul>
-                <li v-for="error in errors" class="alert-danger">
-                    {{ error.error }}
-                </li>
-            </ul>
-        </div>
-        <div v-else class="alert-success">
-            {{ response.message }}
-        </div>
-    </div>
-    <div class="outside">
-    
-        <div class="top">
-            <div class="top-right">
-                <div class="propic">
-                    <img :src="'/static/images/' + user.profile_photo" height="200px" width="200px" alt="profile photo">
-                </div>
-                <div class="userdeets">
-                    <div class="uname">
-                        <h2>{{ user.username }}</h2>
-                    </div>
-                    <div class="uflname">
-                        <h5>{{ user.firstname }} {{ user.lastname }}</h5>
-                    </div>
-                    <div class="locndate">
-                        <p>{{ user.location }} </p>
-                        <p><label>Member Since: </label> {{user.joined_on}}</p>
-                    </div>
-                    <div class="bio">
-                        <p>{{ user.biography }}</p>
-                    </div>
-                </div>
-            </div>
-        
-            <div class="top-left">
-            
-                <div class="count">
-                    <div class="posts">
-                        <h5>{{ posts.length }}</h5>
-                        <h6>Posts</h6>
-                    </div>
-                    <div class="folrs">
-                        <h5>{{ followers }}</h5>
-                        <h6>Followers</h6>
-                    </div>
-                </div>
-                
-                <div class="btn"  v-if = '!(current_user == user.id)'>
-                    <button id = 'follow' type="button" class="btn btn-primary btn-block" @click = 'followuser'>Follow</button>
-                </div>
-                
-            </div>
-        </div>
-        
-        <div class="bottom">
-            <div class="imgupld" v-for = 'post in posts'>
-                <div class="col-lg-3 col-md-4 col-xs-6 thumb">
-                    <img class="img-responsive" :src="'/static/images/' + post" height="240" width="240" alt = "image upload" >
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-    `,
-    data:function (){
-        return {
-            user : {},
-            posts: [],
-            followers:0,
-            current_user:localStorage.getItem('current_user'),
-            response:{},
-            errors:[]
-        };
-    },
-    
-    methods:{
-        followuser: function(){
-            let self = this;
-            let current_user=localStorage.getItem('current_user');
-            //console.log(self.$route.params.user_id);
-            body = {'user_id': self.$route.params.user_id,'current_user':current_user}
-            data = new FormData(body);
-            fetch('/api/users/'+ self.$route.params.user_id+'/follow',{
-                method:'POST',
-                body:data,
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                },
-                credentials:'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                self.response = jsonResonse.message;
-                //console.log(jsonResonse);
-                
-                if(jsonResonse.newRelationship == 'true'){
-                    fetch('/api/users/' + self.$route.params.user_id + '/follow',{
-                        method:'GET',
-                        headers:{
-                            'X-CSRFToken' : token,
-                            'Authorization': 'Bearer '  + localStorage.getItem('token')
-                        },
-                        credentials:'same-origin'
-                    })
-                    .then(function(response){
-                        return response.json();
-                    })
-                    .then(function(jsonResonse){
-                        self.followers = jsonResonse.followers;
-                        $('#follow').css('background-color','green');
-                        $('#follow').text('Following');
-                    });
-                }
-            });
-        }
-    },
-    created:
-        function(){
-            let self = this;
-            fetch('/api/users/' + self.$route.params.user_id,{
-                method:'GET',
-                body:{},
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                },
-                credentials:'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                self.user      = jsonResonse.User;
-                self.posts     = jsonResonse.Posts;
-                self.followers = self.user.number_of_followers;
-            }).then(function(){
-                fetch('/api/users/' + self.$route.params.user_id + '/following',{
-                method:'GET',
-                body:{},
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                },
-                credentials:'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                if(jsonResonse.following){
-                    $('#follow').css('background-color','green');
-                    $('#follow').text('Following');
-                }
-            })
-            .then(function(jsonResonse){
-               if(jsonResonse.Errors == null){
-                   self.response = jsonResonse;
-                   self.errors = [];
-                   //console.log(self.response);
-               }
-               else{
-                   self.errors = jsonResonse.Errors;
-                   console.log(self.errors);
-               }
-            })
-            .catch(function(error){
-                console.log(error);
-            });
-            });
         },
-        watch:{
-            '$route' (to, from){
-                let user_id = to.params.user_id;
-                this.$router.go(to);
-            }
-        }
-});
-
-
-
-const explore = Vue.component('explore',{
-    template:
-    `
-    <div>
-    <div>
-    <div class="errrr" align="center">
-        <div v-if ="errors.length > 0">
-            <ul>
-                <li v-for="error in errors" class="alert-danger">
-                    {{ error.error }}
-                </li>
-            </ul>
-        </div>
-        <div v-else class="alert-success">
-            {{ response.message }}
-        </div>
-    </div>
-    
-    
-    
-    <div class="platter">
-        
-        <div class="newpost" align="center">
-            <router-link class="btn btn-color col-md-10" to="/posts/new">New Post</router-link>
-        </div>
-        
-        <div v-for = 'post in posts.slice().reverse()'>
-        <div class="outerborder">
-            <div class="picNname">
-                <div class="userpic">
-                    <img style="border-radius: 50%;" :src="'/static/images/' + post.user_image" height="40" width="40" alt = "pro pic">
-                </div>
-                <div id = 'username' class="uname" @click = 'goToUserPage' :user_id = post.userid>
-                    {{post.username}}
-                </div>
-            </div>
-            <div class="content">
-            
-                <div class="imgpst">
-                    <img class="img-responsive" :src= "'/static/images/' + post.photo" height="300" width="300" alt = "image upload" >
-                </div>
-                <br>
-                <div class="capt">
-                    <p>{{post.caption}}</p>
-                </div>
-            </div>
-            <div class="dtnL">
-                    <div class="btns">
-                        <div class="likebtn">
-                            <button v-if = 'liked_posts.includes(post.id)' id="like-btn" @click= 'likePost' :post_id = post.id class="btn" type="button" style="background:red; font-size: 10px;"><img src="/static/images/like.png" height="25px" width="25px" alt="like"></button>
-                            <button v-else id="like-btn" @click= 'likePost' :post_id = post.id class="btn" type="button" style="background:white; font-size: 10px;"><img src="/static/images/like.png" height="25px" width="25px" alt="like"></button>
-                            {{post.likes}}  <p v-if = 'post.likes >1 || post.likes == 0'>Likes</p><p v-if = 'post.likes ==1'>Like</p>
-                        </div>
-                        </div>
-                        <div class="dt">
-                            {{post.created_on}}
-                        </div>
-                </div>
-        </div>
-        </div>
-    </div>
-    </div>
-    </div>
-    `,
-    data:function (){
-        return {
-            current_user:localStorage.getItem('current_user'),
-            user : {},
-            response:{},
-            posts:[],
-            errors:[],
-            liked_posts:[]
-        };
-    },
-    created:
-        function(){
-            let self = this;
-            let user_id = localStorage.getItem('current_user');
-            
-            fetch('/api/posts',{
-                method:'GET',
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                }
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                if(jsonResonse.Errors == null){
-                    self.posts = jsonResonse.POSTS;
-                    return self.posts
-                }
-                else{
-                    self.errors = jsonResonse.Errors;
-                }
-            })
-            .then(function(posts){
-                fetch('/api/users/'+user_id+'/like',{
-                method:'GET',
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token'),
-                }
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                self.liked_posts = jsonResonse.liked_posts.map(post => post.postid)
-                //console.log(self.liked_posts);
-            })
-            })
-        },
-        watch:{
-            '$route' (to, from){
-            let user_id = to.params.user_id;
-            console.log(to);
-            this.$router.go(to);
+        data:function(){
+            return {
+                response:[],
+                posts:[],
+                error:[],
+                usertoken:''
             }
         },
         methods:{
-            goToUserPage: function(event){
-                user_id = $(event.target).attr('user_id');
-                this.$router.push({name:'user',params:{'user_id':user_id}});
-            },
-            likePost:
-                function(event){
-                    let self = this;
-                    let like_button;
+            like:function(postid){
+                let self= this;
+                let likevalue=document.getElementById('like'+postid).innerHTML;
+                likevalue=parseInt(likevalue)+1;
+                fetch("/api/posts/"+postid+"/like", { 
+                    method: 'POST',
+                    headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'X-CSRFToken': token
+                        },
+                    credentials: 'same-origin'
                     
-                    if($(event.target).is('button')){
-                        like_button = $(event.target);
+                    })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (jsonResponse) {
+                        if (jsonResponse.response){
+                    
+                            document.getElementById('like'+postid).innerHTML=likevalue;
+                            like=document.getElementById(postid);
+                            document.getElementById('like_btn'+postid).removeChild(like);
+                            newicon=document.createElement('IMG');
+                            newicon.setAttribute('src','static/images/heart2.png');
+                            newicon.classList.add('like_btn');
+                            document.getElementById('like_btn'+postid).appendChild(newicon);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+                
+        }
+});
+
+const UserPost=Vue.component('Userposts',{
+template:`<div v-if="usertoken!==''">
+            <div v-if="error ===''">
+                <div id="profile" class="container shadow jumbotron col-md-12" >
+                    <div class="row">
+                        <div class="col-lg-2 col-md-8"> 
+                            <img class="dispaly_img" v-bind:src="userinfo.photo" />
+                        </div>
+                        <div class="col-lg-10">
+                            <div class="col-lg-6 col-md-8 float-left">
+                                <h4>{{userinfo.fname}}<span> {{userinfo.lname}}</span></h4>
+                                <br>
+                                <p class="lead">{{userinfo.location}} <br>Member since {{userinfo.joined}}</p>
+                                <p class="lead">{{userinfo.bio}}</p> 
+                            </div>
+                            <div class="row col-lg-6 col-md-3">
+                                <div class="col-lg-4 col-md-2 posts">
+                                    <h4><span class="colors">{{numposts}}</span></br>Posts</h4>
+                                </div>
+                                <div class="col-lg-2 col-md-2 follow">
+                                    <h4><span id="followers" class="colors">{{follows}}</span></br>Followers</h4>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 float-right followbutton col-md-6">
+                                <form method="POST" @submit.prevent="follow">
+                                    <input  id='userid' type="hidden" :value=userinfo.id >
+                                    <div v-if="toshow=='Yes'">
+                                        <button id='follow' class="btn btn-primary col-lg-12 col-md-6" >Follow</button>
+                                    </div>
+                                    <div v-else>
+                                        <button disabled class="btn btn-success col-lg-12 col-md-6" >Follow</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="postdisplay" class="container">
+                    
+                </div>
+            </div>
+            <div class="jumbotron" v-else>
+                <h1>User Doesn't exist</h1>
+            </div>
+        </div>
+        <div class="row regular" v-else>
+            <div class="jumbotron shadow">
+                <h3 class="align-middle">You are not logged in</h3>
+            </div>
+        </div>`,
+        created: function () {
+            if(localStorage.getItem('token')!==null){
+                toshow = 'No'
+                let self = this;
+                self.usertoken=localStorage.getItem('token');
+                fetch("/api/users/"+this.$route.params.user_id+"/posts", { 
+                method: 'GET',
+                headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'X-CSRFToken': token
+                    },
+                credentials: 'same-origin'
+                
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (jsonResponse) {
+                    if (jsonResponse.response){
+                        self.posts=jsonResponse.response['0']['posts']['0'];
+                        self.rows=Math.ceil((self.posts.length/self.columns));
+                        self.numposts=jsonResponse.response['0']['numposts'];
+                        self.follows=jsonResponse.response['0']['follows'];
+                        self.userinfo=jsonResponse.response['0']['userinfo'];
+                        
+                        if(self.posts.length < 1){
+                            nopost=document.createElement('DIV');
+                            h3=document.createElement('H3');
+                            h3.appendChild(document.createTextNode('No post Yet'));
+                            nopost.appendChild(h3);
+                            postcontainer=document.getElementById('postdisplay');
+                            postdisplay.appendChild(nopost);
+                            
+                            
+                        }
+                        else{
+                            postcontainer=document.getElementById('postdisplay');
+                            for(i=0;i<self.posts.length+1;i++){
+                                row=document.createElement('DIV');
+                                row.classList.add('row');
+                                for (m=1;m<self.columns+1;m++){
+                                    if(i-1+m<self.posts.length){
+                                        picdiv=document.createElement('DIV');
+                                        picdiv.classList.add('col-lg-4');
+                                        pic=document.createElement('IMG');
+                                        pic.setAttribute('src',self.posts[i-1+m]['photo'])
+                                        pic.classList.add('photo_posts','shadow','img-thumbnail');
+                                        picdiv.appendChild(pic);
+                                        row.appendChild(picdiv);
+                                    }
+                                }
+                                postcontainer.appendChild(row);
+                                postcontainer.appendChild(document.createElement('HR'));
+                                i+=self.columns-1;
+                            }
+                        }
+        
+                        if((jsonResponse.response['0']['current']==='No' &&  jsonResponse.response['0']['following']==='No')===true){
+                            console.log("Yes")
+                            self.toshow='Yes';
+                        }
+                        if(jsonResponse.response['0']['current']==='No' && jsonResponse.response['0']['following']==='Yes'){
+                                self.isfollowing='You are already following '+self.userinfo['username'];
+                        }
                     }
                     else{
-                        like_button = $(event.target).parent();
+                        self.error=jsonResponse.error['error'];
                     }
-                    let post_id = like_button.attr('post_id');
-                    //console.log(post_id);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            }
+            
+        },
+        data:function(){
+            return {
+                usertoken:'',
+                posts:[],
+                follows:0,
+                numposts:0,
+                userinfo:[],
+                isfollowing:'',
+                error:'',
+                toshow:'',
+                columns:3,
+                rows:0,
+                limits:[0],
+            }
+        },methods:{
+            follow:function(){
+                let self= this;
+                let followid=document.getElementById('userid').value;
+                let updatefollows=document.getElementById('followers').innerHTML;
+                updatefollows=parseInt(updatefollows)+1;
+                fetch("/api/users/"+followid+"/follow", { 
+                    method: 'POST',
+                    headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                            'X-CSRFToken': token
+                        },
+                    credentials: 'same-origin'
                     
-                    fetch('/api/posts/'+post_id+'/like',{
-                    method:'POST',
-                    body:{},
-                    headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                },
-                credentials:'same-origin'
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                let liked_post;
-                let index;
-                let i;
-                for(i=0;i<self.posts.length;i++){
-                    if(self.posts[i].id == post_id){
-                        index = i;
-                    }
-                }
-                self.posts[index].likes = jsonResonse.likes;
-                like_button.css('background-color','red');
-            })
+                    })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (jsonResponse) {
+                        if (jsonResponse.response){
+                    
+                            document.getElementById('followers').innerHTML=updatefollows;
+                            document.getElementById('follow').disabled=true;
+                            document.getElementById('follow').classList.remove('btn-primary');
+                            document.getElementById('follow').innerHTML="Following";
+                            document.getElementById('follow').classList.add('btn-success');
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+                
         }
-    }
-});
-
-let logout = Vue.component('logout',{
-    template:"<html></html>",
-    data:"",
-    created:
-        function(){
-            let self = this;
-            fetch('/api/auth/logout',{
-                method:'GET',
-                body:{},
-                headers:{
-                    'X-CSRFToken' : token,
-                    'Authorization': 'Bearer '  + localStorage.getItem('token')
-                }
-            })
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(jsonResonse){
-                self.response = jsonResonse.message;
-                localStorage.clear();
-                self.$router.push('/');
-                location.reload();
-            }).catch(function(error){
-               console.log(error);
-            });
-        }
-});
-
-
+})
 // Define Routes
 const router = new VueRouter({
     routes: [
-        { path: "/",                component: Home },
-        { path: "/login",           component: loginForm},
-        { path: "/register",        component: signupForm},
-        { path: "/posts/new",       component: uploadForm},
-        { path: "/users/:user_id",  component: profile,name:'user'},
-        { path: "/explore",         component: explore},
-        { path: "/logout",          component: logout}
+        { path: "/", component: Home },
+        { path:"/login",component: Login },
+        { path:"/postnew", component:AddPost},
+        { path:"/register", component:Register},
+        { path:"/logout",component:Logout},
+        { path:"/explore",component:Explorer},
+        { path:"/users/:user_id", name:"users", component:UserPost}
     ]
 });
 
-
-//Instantiation of the new Vue App
+// Instantiate our main Vue Instance
 let app = new Vue({
-    el: '#app',
-    data: {
-        welcome: 'Seize the moment and Share it.'
-    },router
+    el: "#app",
+    router
 });
