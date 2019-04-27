@@ -53,10 +53,7 @@ Vue.component('app-header', {
             self.userphoto=localStorage.getItem('userphoto');
         };
         
-        //console.log("Logged in: " + this.userLoggedIn);
-        bus.$on('logged', () => {
-        this.userLoggedIn = this.isLoggedIn();
-        });
+     
     
     },
     data: function() {
